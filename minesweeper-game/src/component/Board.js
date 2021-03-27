@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Cell from "./Cell";
+import seedrandom from 'seedrandom';
+const rng = seedrandom("1"); 
 
 const Board = ({ boderState }) => {
   const [gamestatus, setGamestatus] = useState("game is processing");
   const [mineCount, setMineCount] = useState(boderState.mine);
-  const [currentData, setCurrentData] = useState(null);
+  const [currentDataRaw, setCurrentData] = useState(null);
+  const currentData = JSON.parse(JSON.stringify(currentDataRaw))
 
   const createEmptyArray = () => {
     //创建一个二维数组，记录每一个cell的状态
@@ -37,8 +40,8 @@ const Board = ({ boderState }) => {
       randomY,
       minePlanted = 0;
     while (minePlanted < mineCount) {
-      randomX = (Math.floor(Math.random() * 1000) + 1) % boderState.height;
-      randomY = (Math.floor(Math.random() * 1000) + 1) % boderState.width;
+      randomX = (Math.floor(rng() * 1000) + 1) % boderState.height;
+      randomY = (Math.floor(rng() * 1000) + 1) % boderState.width;
 
       if (data[randomX][randomY].isMine === false) {
         data[randomX][randomY].isMine = true;
@@ -176,11 +179,11 @@ const Board = ({ boderState }) => {
   // };
 
   const revealEmpty = (x, y, data, deep) => {
-    console.log('找到周围所有的空节点')
+    console.log('找到周围所有的空节点', x, y, deep)
     // console.log("revealEmpty", x, y, data, deep);
-    // if (depth > 10) {
-    //   return;
-    // }
+    if (deep > 10) {
+      return;
+    }
     //递归找到周围的所有空节点，可以被显示的cell的要求为：没有被标记，没有被点击，不是炸弹，且为空 ？？
     let area = traverseBoard(x, y, data);
     // console.log("area",area)
@@ -198,15 +201,16 @@ const Board = ({ boderState }) => {
       //   if (value.isEmpty === true && value.isRecursion === false)
       //     revealEmpty(value.x, value.y, data, deep + 1); //递归
       // }
-      if (value.isEmpty === true)
-      revealEmpty(value.x, value.y, data, deep + 1); //递归
+      if (value.isEmpty === true){
+        revealEmpty(value.x, value.y, data, deep + 1); //递归
+      }
   }
     });
     return data;
   };
   const handleClick = (x, y) => {
     //当cell被点击时
-    console.log("click");
+    console.log("click", x, y);
     let updata = currentData;
     console.log(updata);
     if (updata[x][y].isRevealed === true) return null;
@@ -220,7 +224,7 @@ const Board = ({ boderState }) => {
 
     if (updata[x][y].isEmpty === true) {
       console.log('this is empty')
-      updata = revealEmpty(x, y, updata);
+      updata = revealEmpty(x, y, updata, 0);
       setCurrentData(updata);
     }
 

@@ -9,12 +9,16 @@ const Cell = ({data,onClick}) => {
     (data.isMine === true ? " is-mine" : " ") +
     (data.isFlaged === true ? " is-flag" : " ");
 
-
-  console.log(className)
   const cellContent = () => {
     
     if (!data.isRevealed) {
-      return data.isFlaged ? "🚩" : "";
+      if(data.isFlaged){
+        return "🚩"
+      }
+      if(data.isMine){
+        return "x" // # 为了调试
+      }
+      return "";
     }
     if (data.isMine) {
       return "💣";
